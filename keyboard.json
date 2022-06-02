@@ -1,0 +1,230 @@
+{
+"primitive_messages":[
+    {"new_user":{
+        "inline_keyboard":[
+            [{
+                "text" : "Давай",
+                "callback_data":"btn1"
+            }]]}},
+    {"reviews_courses_discount":{
+        "inline_keyboard":[
+            [{
+                "text" : "Отзывы",
+                "url":"https://t.me/siyp_bot_otzyv"
+            }],
+            [{
+                "text":"Бизнес-идеи",
+                "url":"https://t.me/SIYP_ideas"
+                }],
+            [{
+                "text":"Получить скидку",
+                "callback_data":"btn2"
+            }]]}},
+    {"share_discount":{
+            "inline_keyboard":[
+                [{
+                    "text" : "Получить",
+                    "callback_data":"btn3"
+                }]]}},
+    {"get_discount":{
+        "inline_keyboard":[
+            [{
+                "text" : "Купить",
+                "callback_data":"buy1"
+            }]]}},
+    {"wanna_earn":{
+        "inline_keyboard":[
+            [{
+                "text" : "Подробнее",
+                "callback_data":"btn5"
+            }]]}},
+    {"more_information":{
+        "inline_keyboard":[
+            [{
+                "text" : "Рассчитать",
+                "callback_data":"btn6"
+            }]]}},
+    {"calculate":{
+        "inline_keyboard":[
+            [{
+                "text" : "Рассчитать",
+                "callback_data":"btn7"
+            }]]}},
+    {"calculate1":{
+        "inline_keyboard":[
+            [{
+                "text" : "Давай",
+                "callback_data":"btn8"
+            }]]}},
+    {"calculate2":{
+        "inline_keyboard":[
+            [{
+                "text" : "Получить ссылку",
+                "callback_data":"btn9"
+            }]]}},
+    {"get_link":{
+        "inline_keyboard":[
+            [{
+                "text" : "Дай ссылку 😡",
+                "callback_data":"btn10"
+            }]]}},
+    {"keep_calm":{
+        "inline_keyboard":[
+            [{
+                "text" : "Регистрация QIWI ",
+                "url":"https://qiwi.com/"
+            }],
+            [{
+                "text":"Ввод QIWI",
+                "callback_data":"buy3"
+            }]]}},
+    {"phone_number":{
+        "inline_keyboard":[
+            [{
+                "text" : "Отмена",
+                "callback_data":"buy4"
+            }]]}}
+],
+
+"is_number_correct":{
+    "inline_keyboard":[
+        [{
+            "text" : "Все верно",
+            "callback_data":"buy5"
+        }],
+        [{
+            "text" : "Исправить",
+            "callback_data":"buy6"
+        }]
+        ]},
+
+
+"menu":{
+    "inline_keyboard":[
+        [{
+            "text":"Бизнес-идеи",
+            "callback_data":"menu1"
+        }],
+        [{
+            "text":"Рефералка",
+            "callback_data":"menu2"
+            }],
+        [{
+            "text":"Мои данные",
+            "callback_data":"menu3"
+        }],
+        [{
+            "text":"Баланс",
+            "callback_data":"menu4"
+        }]
+        ]}
+,
+
+"business_ideas":{
+    "inline_keyboard":[
+        [{
+            "text":"Купить Бизнес-идею",
+            "callback_data":"menu5"
+        }],
+        [{
+            "text":"Список Бизнес-идей",
+            "url":"https://t.me/SIYP_ideas"
+            }],
+        [{
+            "text":"Мои бизнес идеи",
+            "callback_data":"menu6"
+        }],
+        [{
+            "text":"Назад",
+            "callback_data":"menu0"
+        }]
+        ]},
+
+"referal":{
+    "inline_keyboard":[
+        [{
+            "text":"Информация",
+            "callback_data":"menu7"
+        }],
+        [{
+            "text":"Мои рефералы",
+            "callback_data":"menu8"
+            }],
+        [{
+            "text":"Реферальная ссылка",
+            "callback_data":"menu9"
+        }],
+        [{
+            "text":"Мой заработок",
+            "callback_data":"menu10"
+        }],
+        [{
+            "text":"Назад",
+            "callback_data":"menu0"
+        }]
+        ]}
+,
+
+"admin":{
+    "inline_keyboard":[
+        [{
+            "text":"Бизнес-идеи",
+            "callback_data":"admin1"
+        }],
+        [{
+            "text":"Сообщения",
+            "callback_data":"admin2"
+            }],
+        [{
+            "text":"Отчеты",
+            "callback_data":"admin3"
+        }]
+        ]
+}
+,
+"courses_admin":{
+    "inline_keyboard":[
+        [{
+            "text":"Добавить",
+            "callback_data":"admin4"
+        }],
+        [{
+            "text":"Обновить",
+            "callback_data":"admin5"
+            }],
+        [{
+            "text":"Удалить",
+            "callback_data":"admin6"
+            }],
+        [{
+            "text":"Назад",
+            "callback_data":"admin0"
+        }]
+        ]
+},
+"update":{
+    "inline_keyboard":[
+        [{
+            "text":"Название",
+            "callback_data":"upd|1|id"
+        }],
+        [{
+            "text":"Описание",
+            "callback_data":"upd|2|id"
+            }],
+        [{
+            "text":"Ссылка",
+            "callback_data":"upd|3|id"
+            }],
+        [{
+            "text":"Картинка",
+            "callback_data":"upd|4|id"
+            }],
+        [{"text":"Выйти",
+            "callback_data":"admin0"}]
+        ]
+}
+
+
+
+}

@@ -1,0 +1,7 @@
+pymysql
+pyqiwip2p
+asyncio
+aiogram
+pandas
+aioschedule
+SimpleQIWI
