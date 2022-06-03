@@ -144,8 +144,6 @@ class Other_Funcs(Qiwi_init):
             int(digit)
             if digit[0] in ['+','-']:
                 digit = digit[1:]
-            elif digit[0] == '8':
-                digit = '7' + digit[1:]
             return digit, True
         except ValueError:
             return digit, False
@@ -162,7 +160,7 @@ class Other_Funcs(Qiwi_init):
             user_id = message['from']['id']
             users_courses = self.get_users_courses(page,user_id)
             last_page = self.get_len(user_id)['count(1)']
-            msg = f'Ваши приобретенные курсы (количество: {last_page}):'
+            msg = f'Ваши приобретенные курсы (количество - {last_page}):'
             mark_up = {"inline_keyboard":[]}
             for i in range(len(users_courses)):
                 a_course = self.get_course(users_courses[i]['course_id'])
