@@ -17,6 +17,7 @@ class DataBase():
                             database=self.config_db['db'],
                             port = self.config_db['port'],
                             charset='utf8mb4',
+                            use_unicode=True,
                             cursorclass=pymysql.cursors.DictCursor)
         self.cur = self.conn.cursor()
         print('Connected')
@@ -393,8 +394,9 @@ class DataBase():
     
     def new_out_pay(self,**data):
         my_execute = f"""
-            INSERT INTO `outcomming_payments` (`user_id`, `value_of_payment`, `cooment`) 
-                VALUES ('{data['user_id']}', '{data['amount']}', '{data['comment']}');"""
+            INSERT INTO `outcomming_payments` (`user_id`, `value_of_payment`, `cooment`, `is_it_end`, `is_it_success` ) 
+                VALUES ('{data['user_id']}', '{data['amount']}', '{data['comment']}', '1', '1');"""
+        self.cur.execute(my_execute)
         self.conn.commit()
 
     def users_to_daily_pay(self):
@@ -402,4 +404,4 @@ class DataBase():
         return self.cur.fetchall()
 
 # db = DataBase()
-# print(db.get_data_children_1_lvl(1032707306))
+# print(db.my_salary_db(1032707306))

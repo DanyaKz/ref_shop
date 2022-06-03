@@ -3,19 +3,22 @@ from pyqiwip2p import QiwiP2P
 import random 
 from db import DataBase
 import asyncio
+import json
 
 # from pyqiwip2p.types import QiwiCustomer, QiwiDatetime
 
 class Qiwi_init(DataBase):
     def __init__(self):
         super().__init__()
-        self.public = config['qiwi']['public']
-        self.private = config['qiwi']['private']
-        self.simple_key = config['qiwi']['transaction']
+        with open('config.json', encoding='utf-8') as mgs:
+            self.config = json.load(mgs)
+        self.public = self.config['qiwi']['public']
+        self.private = self.config['qiwi']['private']
+        self.simple_key = self.config['qiwi']['transaction']
         self.p2p = QiwiP2P(auth_key=self.private)
-        self.phone = config['qiwi']['phone']
+        self.phone = self.config['qiwi']['phone']
         self.simpli_api = QApi(token=self.simple_key, phone=self.phone)
-        self.owner = 1032707306
+        self.owner = 1299800437
 
     def create_payment(self, data):
         bill_id = f"{data['user_id']//1000}{data['course_id']}{random.randint(1000, 9999)}"
@@ -31,13 +34,14 @@ class Qiwi_init(DataBase):
         bill_id = self.check_db_payment(user_id)
         print(bill_id , isinstance(bill_id,dict))
         if isinstance(bill_id,dict):
-            check = self.p2p.check(bill_id=bill_id['inc_pay_id'])
+            check = self.p2p.check(bill_id=bill_id['inc_pay_id']).status
+            print(check)
             # check = 'paid'
-            if check.lower() == 'paid':
+            if check == 'PAID':
                 self.set_paid(bill_id['inc_pay_id'])
                 self.set_coin_level(user_id)
-                if not self.is_user_exists(user_id)['registration']:
-                    self.set_reg_done(user_id)
+                # if not self.is_user_exists(user_id)['registration']:
+                #     self.set_reg_done(user_id)
                 return True
             else :
                 return False

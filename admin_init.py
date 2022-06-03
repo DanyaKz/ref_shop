@@ -16,7 +16,7 @@ class Admin_Init(Other_Funcs):
     def __init__(self):
         super().__init__()
         self.chanel_id = -1001770619243
-        self.owner = 1032707306
+        self.owner = 1299800437
         with open('keyboard.json', encoding='utf-8') as kb:
             self.KB = json.load(kb)
 

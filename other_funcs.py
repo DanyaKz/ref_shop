@@ -13,7 +13,7 @@ from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButt
 class Other_Funcs(Qiwi_init):
     def __init__(self):
         super().__init__()
-        self.owner = 1032707306
+        self.owner = 1299800437
 
     
     async def callback_speaker(self , **kwargs):
@@ -78,12 +78,12 @@ class Other_Funcs(Qiwi_init):
                                 "text" : "Оплатил(а)",
                                 "callback_data":"buy2"
                             }]]}
-                    text = f"<b>Товар:</b> {courses['title']}\n\n{courses['descriptionn']} \n\n<b>Цена:</b>{data['amount']}"
+                    text = f"<b>Товар:</b> {courses['title']} \n\n<b>Цена:</b> {data['amount']} рублей"
                     await self.bot.send_message(data['user_id'], 
                                     text = text , reply_markup = inline_kb , parse_mode = 'HTML')
             else:
                 await self.bot.send_message(data['user_id'], 
-                                text = 'Данного курса не существует. Проверьте правильность его написания и пришлите еще раз.' 
+                                text = 'Данный курс больше не доступен к продаже' 
                                 , parse_mode = 'HTML')
     
     async def before_check(self,user_id):
@@ -155,7 +155,7 @@ class Other_Funcs(Qiwi_init):
         to_return = '\n'
         if len(children) > 0:
             for i in range(len(children)):
-                to_return += f"""<a href = "https://web.telegram.org/z/#{children[i]['user_id']}">{children[i]['first_name']}</a>,"""
+                to_return += f"""    <i><a href = "https://web.telegram.org/z/#{children[i]['user_id']}">«{children[i]['first_name']}»</a>,</i>"""
         return to_return[:-1]
     
     async def courses_list(self, message, page , isFirst = False):
@@ -172,10 +172,10 @@ class Other_Funcs(Qiwi_init):
             next_p = [{"text":f"След. стр. #️⃣ {page+1}","callback_data":"get_more"}]
             prev_p = [{"text":f"Пред. стр. #️⃣ {page-1}","callback_data":"get_prev"}]
             both_p = [prev_p[0],next_p[0]]
-            if last_page > 1:
+            if last_page > 5:
                 if isFirst or page == 1:
                     mark_up["inline_keyboard"].append(list(next_p))
-                elif ((page == (last_page//1) + 1) and last_page % 1 != 0) or ((page == last_page//1) and last_page % 1 == 0):
+                elif ((page == (last_page//5) + 1) and last_page % 5 != 0) or ((page == last_page//5) and last_page % 5 == 0):
                     mark_up["inline_keyboard"].append(list(prev_p))
                 else:
                     mark_up["inline_keyboard"].append(both_p)

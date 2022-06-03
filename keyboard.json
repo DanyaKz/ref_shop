@@ -13,10 +13,6 @@
                 "url":"https://t.me/siyp_bot_otzyv"
             }],
             [{
-                "text":"Бизнес-идеи",
-                "url":"https://t.me/SIYP_ideas"
-                }],
-            [{
                 "text":"Получить скидку",
                 "callback_data":"btn2"
             }]]}},

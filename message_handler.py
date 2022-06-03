@@ -20,7 +20,7 @@ class Message_init(Admin_Init):
         logging.basicConfig(level=logging.INFO)
         self.bot = Bot(token=API_TOKEN)
         self.dp = Dispatcher(self.bot)
-        self.owner = 1032707306 #owner's telegram id
+        self.owner = 1299800437 #owner's telegram id
         with open('messages.json', encoding='utf-8') as mgs:
             self.list_of_msgs = json.load(mgs)
         with open('keyboard.json', encoding='utf-8') as kb:
@@ -204,7 +204,7 @@ class Message_init(Admin_Init):
             if code == 1:
                 to_send = {'amount':10,
                             'user_id':user_id,
-                            'course_id':1,
+                            'course_id':2,
                             'owner':self.owner
                             }
                 print(code)
@@ -222,7 +222,7 @@ class Message_init(Admin_Init):
                                                 mark=self.KB['primitive_messages'][4]['wanna_earn'],
                                                 to = user_id)
                     else :
-                        await call.answer(text='Вы еще не оплатили.',show_alert=True)
+                        await call.answer(text='Вы еще не оплатили. Если же вы оплатили, то попробуйте подтвердить оплату через несколько минут.',show_alert=True)
                 else:
                     await call.answer(text=check,show_alert=True)
                     await self.bot.delete_message(chat_id = call.message.chat.id , message_id = call.message.message_id)

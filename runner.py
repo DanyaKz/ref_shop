@@ -1,24 +1,15 @@
 from message_handler import Message_init
 import asyncio
 import aioschedule
-
+import json
 
 class Runner(Message_init):
     def __init__(self):
+        with open('config.json', encoding='utf-8') as mgs:
+            self.config = json.load(mgs)
         self.token = self.config['bot_api']
         super().__init__(self.token)
         
-    
-    async def noon_print(self):
-        # await self.daily_payment()
-        # #7:30
-        # await self.daily_admin_response()
-        # #8:00
-        # await self.daily_users_response()
-        # #8:30
-        # await self.daily_zero_users_response()
-        pass
-
 
 
     async def scheduler(self):
@@ -52,9 +43,8 @@ class Runner(Message_init):
     
 
 bot = Runner()
-try:
+try: 
     bot.run_funcs()
 except Exception as e:
-    bot.send_to_developer(e)
+    asyncio.create_task(bot.send_to_developer(e))
     bot.run_funcs()
-
