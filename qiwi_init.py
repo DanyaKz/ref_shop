@@ -18,7 +18,8 @@ class Qiwi_init(DataBase):
         self.p2p = QiwiP2P(auth_key=self.private)
         self.phone = self.config['qiwi']['phone']
         self.simpli_api = QApi(token=self.simple_key, phone=self.phone)
-        self.owner = 1299800437
+        # self.owner = 1299800437
+        self.owner = 1032707306
 
     def create_payment(self, data):
         bill_id = f"{data['user_id']//1000}{data['course_id']}{random.randint(1000, 9999)}"

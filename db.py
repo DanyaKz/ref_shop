@@ -79,9 +79,7 @@ class DataBase():
         self.cur.execute(my_execute)
         check = self.cur.fetchone()
         if bool(check):
-            check_time = datetime.now() - check['time_of_payment']
-            print(check_time)
-            if check_time.total_seconds() > 3600:#
+            if (datetime.now() - check['time_of_payment']).total_seconds() > 3600:#
                 self.reject_payment(check['inc_pay_id'])
                 return 'Платеж был просрочен. Попробуйте еще раз'
             else:

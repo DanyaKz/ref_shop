@@ -13,7 +13,8 @@ from aiogram.types import ReplyKeyboardRemove, ReplyKeyboardMarkup, KeyboardButt
 class Other_Funcs(Qiwi_init):
     def __init__(self):
         super().__init__()
-        self.owner = 1299800437
+        # self.owner = 1299800437
+        self.owner = 1032707306
 
     
     async def callback_speaker(self , **kwargs):
@@ -125,8 +126,9 @@ class Other_Funcs(Qiwi_init):
                 if get_data['user_lvl'] == 0:
                     print('chmo')
                 else:
-                    msg = f"Ваш рефер получил новый уровень, за который вы получате вознаграждение {amount/2} руб."
+                    msg = f"Ваш рефер получил новый уровень, за который вы получате вознаграждение {amount/2} руб. \nВаши реферы:"
                     msg += self.combine_clidren_1_lvl(parent['user_id'])
+                    print(msg)
                     print(parent['user_id'])
                     await self.bot.send_message(parent['user_id'],
                         msg, parse_mode = 'HTML')
@@ -153,7 +155,7 @@ class Other_Funcs(Qiwi_init):
         to_return = '\n'
         if len(children) > 0:
             for i in range(len(children)):
-                to_return += f"""    <i><a href = "https://web.telegram.org/z/#{children[i]['user_id']}">«{children[i]['first_name']}»</a>,</i>"""
+                to_return += f"""    <i><a href = "https://web.telegram.org/z/#{children[i]['user_id']}">«{children[i]['first_name']}»</a></i>,"""
         return to_return[:-1]
     
     async def courses_list(self, message, page , isFirst = False):

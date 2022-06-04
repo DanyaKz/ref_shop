@@ -20,7 +20,8 @@ class Message_init(Admin_Init):
         logging.basicConfig(level=logging.INFO)
         self.bot = Bot(token=API_TOKEN)
         self.dp = Dispatcher(self.bot)
-        self.owner = 1299800437 #owner's telegram id
+        # self.owner = 1299800437 #owner's telegram id
+        self.owner = 1032707306
         with open('messages.json', encoding='utf-8') as mgs:
             self.list_of_msgs = json.load(mgs)
         with open('keyboard.json', encoding='utf-8') as kb:
@@ -202,7 +203,7 @@ class Message_init(Admin_Init):
             if code.isdigit():
                     code = int(code)
             if code == 1:
-                to_send = {'amount':10,
+                to_send = {'amount':2,
                             'user_id':user_id,
                             'course_id':2,
                             'owner':self.owner
@@ -244,12 +245,12 @@ class Message_init(Admin_Init):
                 if not get_user['registration']:
                     self.set_reg_done(user_id)
                     await self.callback_speaker(msg =  msg.replace('ref_link',get_user['personal_link']), 
-                                            mark={'keyboard':[['Главное меню']]},
+                                            mark=ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Главное меню')),
                                             to = user_id)
                     
                 else:
                     await self.bot.send_message(user_id, 
-                        text = ' '.join(msg.split('\n')[:2]) ,parse_mode = 'HTML', reply_markup={'keyboard':[['Главное меню']]})
+                        text = ' '.join(msg.split('\n')[:2]) ,parse_mode = 'HTML', reply_markup=ReplyKeyboardMarkup(resize_keyboard=True).add(KeyboardButton('Главное меню')))
                     await self.callback_speaker(msg = 'Главное меню:', 
                                             mark=self.KB['menu'],
                                             to = user_id)
@@ -445,11 +446,15 @@ class Message_init(Admin_Init):
                     await self.callback_speaker(to = call.message.chat.id, 
                                                 msg  = 'Пост был успешно обновлен.',
                                                 mark = self.KB['admin'])
-                except aiogram.utils.exceptions.MessageCantBeEdited:
+                except aiogram.utils.exceptions.MessageCantBeEdited: 
                     await self.callback_speaker(to = call.message.chat.id, 
                                                 msg  = 'К сожалению, данный пост в канале не может быть обновлен, но он был обновлен в базе данных.Скорее всего прошло больше 48 часов. Рекомендую обновить вручную',
                                                 mark = self.KB['admin'])
                     await self.bot.delete_message(chat_id = call.message.chat.id , message_id = call.message.message_id)
+                except aiogram.utils.exceptions.MessageNotModified:
+                    await call.answer('Вами не было внесено никаких изменений. Если вы действительно хотите изменить содержимое публикации, сравните новые данные с публикацией, дабы избежать дублирования.' ,show_alert = True)
+                    await self.bot.delete_message(chat_id = call.message.chat.id , message_id = call.message.message_id)
+                    await self.bot.delete_message(chat_id = call.message.chat.id , message_id = call.message.message_id-1)
                 self.set_action(111,call['from']['id'])
 
 
