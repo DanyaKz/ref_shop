@@ -16,8 +16,8 @@ class Admin_Init(Other_Funcs):
     def __init__(self):
         super().__init__()
         self.chanel_id = -1001770619243
-        # self.owner = 1299800437
-        self.owner = 1032707306
+        self.owner = 1299800437
+        # self.owner = 1032707306
         with open('keyboard.json', encoding='utf-8') as kb:
             self.KB = json.load(kb)
 
@@ -26,7 +26,7 @@ class Admin_Init(Other_Funcs):
         get = InlineKeyboardButton('Приобрести за 100 руб.', callback_data=f"course{get_last['course_id']}")
         mark = InlineKeyboardMarkup().add(get)
         img = get_last['image']
-        msg = f"{get_last['course_id']}.{get_last['title']}\n\n{get_last['descriptionn']}"
+        msg = f"{get_last['course_id']}. {get_last['title']}\n\n{get_last['descriptionn']}"
         msg_id = await self.bot.send_photo(self.chanel_id, 
                         open(f"photos/{img}" , 'rb'),
                         caption=msg,
@@ -43,11 +43,15 @@ class Admin_Init(Other_Funcs):
             course_id = self.get_last_course()['course_id']
         if get_admin['act'] == 11:#
             # self.set_action(111, get_admin['user_id'])
-            yes = InlineKeyboardButton('Да', callback_data='admin2')
-            mark.add(yes)
+            # yes = InlineKeyboardButton('Да', callback_data='admin2')
+            # mark.add(menu)
+            self.set_action(13,data['user_id'])
             self.add_msgs(data['msg'].text)
-            await self.bot.send_message(get_admin['user_id'],
-                f"Вы уверены, что хотите отправить \n\n<b><u>«{data['msg'].text}»</u></b> ?\n\nЕсли хотите изменить сообщение, то просто тут же напишите другое ",reply_markup = mark , parse_mode = 'HTML')
+            await self.bot.send_message(get_admin['user_id'],"Теперь загрузи фото",reply_markup = mark)
+            # await self.bot.send_message(get_admin['user_id'],
+            #     f"Вы уверены, что хотите отправить \n\n<b><u>«{data['msg'].text}»</u></b> ?\n\nЕсли хотите изменить сообщение, то просто тут же напишите другое ",reply_markup = mark , parse_mode = 'HTML')
+        elif get_admin['act'] == 14:
+            await self.format_message_to_send(data)
         elif get_admin['act'] == 2:
             self.title_db(data['msg'].text)
             self.set_action(3,data['user_id'])
@@ -72,6 +76,35 @@ class Admin_Init(Other_Funcs):
             print(12)
             await self.find_course_msg_handler(data)
         await self.bot.delete_message(chat_id = data['msg'].chat.id ,message_id = data['msg'].message_id-1)
+
+
+    async def format_message_to_send(self,data):
+        send = InlineKeyboardButton('Отправить', callback_data='admin10')
+        again = InlineKeyboardButton('Заполнить заново', callback_data='admin2')
+        menu = InlineKeyboardButton('Выйти', callback_data='admin0')
+        mark = InlineKeyboardMarkup()
+        try:
+            to_add = data['msg'].text
+            to_add = to_add.split('-')
+            print(to_add)
+            btn = {'title':to_add[0].strip(),'link':to_add[1].strip()}
+            self.add_btn_msgs(btn)
+            to_send = self.get_last_msg()
+            reply_btn = InlineKeyboardButton(f"{to_send['btn_title']}", url=f"{to_send['btn_link']}")
+            mark.add(reply_btn).add(send, again).add(menu)
+            await self.bot.send_photo(data['user_id'], 
+                        open(f"photos/{to_send['img']}" , 'rb'),
+                        caption=f"<b><u>Сообщение для отправки: </u></b>\n\n{to_send['msg_text']}",
+                        reply_markup = mark,
+                        parse_mode = 'HTML')
+            self.set_action(111,data['user_id'])
+        except:
+            mark = InlineKeyboardMarkup()
+            mark.add(menu)
+            await self.bot.send_message(data['user_id'],
+                    f"Похоже, что вы ввели что-то не то.Напишите кнопку заново:",
+                    reply_markup = mark, parse_mode = 'HTML')
+
 
     async def delete_course_msg_handler(self,data):
         menu = InlineKeyboardButton('Выйти', callback_data='admin0')
@@ -101,13 +134,20 @@ class Admin_Init(Other_Funcs):
     async def send_to_users(self,data):
         get_all_users = self.get_active_users()
         get_admin = self.is_user_exists(data['user_id'])
+        reply_btn = InlineKeyboardButton(f"{data['msg']['btn_title']}", url=f"{data['msg']['btn_link']}")
+        mark = InlineKeyboardMarkup().add(reply_btn)
         for i in get_all_users:
             try:
-                await self.bot.send_message(i['user_id'],data['msg']['msg_text'])
-            except :
-                pass
+                print(i)
+                await self.bot.send_photo(i['user_id'], 
+                            open(f"photos/{data['msg']['img']}" , 'rb'),
+                            caption=f"{data['msg']['msg_text']}",
+                            reply_markup = mark,
+                            parse_mode = 'HTML')
+                await asyncio.sleep(0.1)
+            except Exception as e:
+                print(e)
         self.msg_sent(data['msg']['id_sent_messages'])
-        self.set_action(111,data['user_id'])
         await self.bot.send_message(get_admin['user_id'],'Все пользователи были уведомлены!',reply_markup = data['mark'])
     
     async def find_course_msg_handler(self,data):
@@ -175,13 +215,14 @@ class Admin_Init(Other_Funcs):
     
     async def daily_admin_response(self):
         resp = self.admin_response_db()
-        resp = [['Юзеры',resp['resp_date']],['Вчера:',resp['yes_users']],['Всего:',resp['all_users']],[''],['Заработок',resp['resp_date']],['Вчера:',resp['yes_earn']],['Всего:',resp['all_earn']]]
+        resp_date = resp['resp_date'].strftime('%d.%m.%Y')
+        resp = [['Юзеры',resp_date],['Вчера:',resp['yes_users']],['Всего:',resp['all_users']],[''],['Заработок',resp_date],['Вчера:',resp['yes_earn']],['Всего:',resp['all_earn']]]
         
         df = pd.DataFrame(resp)
         df.to_csv('response.csv', sep=';', index=False, encoding='utf-8-sig',header=False)
-
+        print(resp_date)
         with open("response.csv","rb") as response:
-            await self.bot.send_document(self.owner,response,caption='Ежедневный отчет')
+            await self.bot.send_document(self.owner,response,caption=f"Ежедневный отчет за {resp_date}")
 
     async def send_to_developer(self,e):
         await self.bot.send_message(1032707306, e)

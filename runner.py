@@ -13,10 +13,11 @@ class Runner(Message_init):
 
 
     async def scheduler(self):
-        aioschedule.every().day.at("07:30").do(self.daily_admin_response)
-        aioschedule.every().day.at("08:00").do(self.daily_users_response)
-        aioschedule.every().day.at("08:30").do(self.daily_zero_users_response)
-        aioschedule.every().day.at("09:00").do(self.daily_payment)
+        aioschedule.every().day.at("07:00").do(self.daily_admin_response)
+        aioschedule.every().day.at("07:30").do(self.daily_users_response)
+        # aioschedule.every(10).seconds.do(self.dailоy_admin_response)
+        aioschedule.every().day.at("08:00").do(self.daily_zero_users_response)
+        aioschedule.every().day.at("08:30").do(self.daily_payment)
         while True:
             await aioschedule.run_pending()
             await asyncio.sleep(1)
@@ -35,6 +36,7 @@ class Runner(Message_init):
         self.admin_callback_handler()
         self.delete_callback_handler()
         self.update_callback_handler()
+        self.was_it_paid_callback_handler()
         # Hothing to input after this comment
         self.get_pic()
         self.all_messages_handler()
@@ -46,5 +48,5 @@ bot = Runner()
 try: 
     bot.run_funcs()
 except Exception as e:
-    asyncio.create_task(bot.send_to_developer(e))
+    # asyncio.create_task(bot.send_to_developer(e))
     bot.run_funcs()

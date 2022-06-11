@@ -1,9 +1,7 @@
-use sys; 
+create database siyp;
+use siyp;
 
-SET time_zone = '+03:00';
-select now();
-
-
+SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
 
 CREATE TABLE `actions` (
   `act_id` int NOT NULL,
@@ -26,6 +24,8 @@ INSERT INTO `actions` (`act_id`, `act_name`) VALUES
 (10, 'del'),
 (11, 'send_message'),
 (12, 'find'),
+(13,'send_message_pic'),
+(14, 'send_message_btn'),
 (111, 'free');
 
 CREATE TABLE `admin_response` (
@@ -56,6 +56,11 @@ CREATE TABLE `sent_messages` (
   `was_it_sent` tinyint DEFAULT '0',
   PRIMARY KEY (`id_sent_messages`)
 ) ;
+ALTER TABLE `sent_messages` 
+ADD COLUMN `img` TEXT NULL AFTER `msg_text`,
+ADD COLUMN `btn_title` TEXT NULL AFTER `img`,
+ADD COLUMN `btn_link` TEXT NULL AFTER `btn_title`;
+
 
 CREATE TABLE `queue_to_update` (
   `idqueue_to_update` int NOT NULL AUTO_INCREMENT,
@@ -85,25 +90,21 @@ CREATE TABLE `users` (
 );
 
 
-
-
 delimiter $$
 create trigger personal_link
 before insert on users
 for each row
 begin 
-	set new.personal_link =  concat('https://t.me/dan_courses_bot?start=', convert(new.user_id,char)) ;
-end $$
-delimiter 
-;
+	set new.personal_link =  concat('https://t.me/siyp_bot?start=', convert(new.user_id,char)) ;
+end $$ delimiter; 
+
 DELIMITER $$
 CREATE TRIGGER `when_1_lvl` BEFORE UPDATE ON `users` FOR EACH ROW begin
 	if new.lvl = 1
 		then
 			set new.when_joined = now();
 	end if;
-end$$
-DELIMITER ;
+end $$ DELIMITER ;
 
 CREATE TABLE `tree` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -115,6 +116,7 @@ CREATE TABLE `tree` (
   PRIMARY KEY (`id`),
   FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE
 ) ;
+
 delimiter $$
 create trigger lvl
 before insert on tree
@@ -127,8 +129,7 @@ begin
 		set @i := (select lvl from tree t where t.id = new.parent_id );
 		set new.lvl = @i + 1 ; 
 	end if;
-end $$
-delimiter ;
+end $$ delimiter ;
 
 
 CREATE TABLE `incoming_payments` (
@@ -215,15 +216,14 @@ BEGIN
         UPDATE tree t SET lft = (@i := @i + 1), rgt = (@i := @i + 1)
         WHERE parent_id = @parent_id ORDER BY id;
     END LOOP;
-END$$
-DELIMITER ;
+END $$ DELIMITER ;
 
 DELIMITER $$
 CREATE function my_salary (u_id bigint) 
 RETURNS INT DETERMINISTIC MODIFIES SQL DATA
 DETERMINISTIC
 BEGIN 
-	set @val = (select sum(value_of_payment),avg(value_of_payment) from outcomming_payments o
+	set @val = (select sum(value_of_payment) from outcomming_payments o
 	where o.user_id = u_id and 
 	is_it_end = 1 and
 	is_it_success = 1);
@@ -231,8 +231,8 @@ BEGIN
 		return (0);
     end if;
 	return (@val);
-END$$
-DELIMITER ;
+END $$ DELIMITER ;
+
 
 
 delimiter $$
@@ -246,14 +246,14 @@ BEGIN
                 on t.user_id = u.user_id
             join (select lft,rgt,lvl from tree where user_id = @us_id) sub
                 on (sub.lft < t.lft and sub.rgt > t.rgt) 
-            where (t.lvl - sub.lvl) = 1 and u.lvl > 0);
+            where cast(t.lvl as signed) - cast(sub.lvl as signed) = 1 and u.lvl > 0);
 	set @all_children = (select count(1)
 			from tree t
 			join users u   
 				on t.user_id = u.user_id
 			join (select lft,rgt,lvl from tree where user_id = @us_id ) sub
 				on (sub.lft < t.lft and sub.rgt > t.rgt) 
-                where (t.lvl - sub.lvl) <= (select lvl from users where user_id = @us_id) 
+                where cast(t.lvl as signed) - cast(sub.lvl as signed) <= (select lvl from users where user_id = @us_id) 
             and u.lvl > 0);
 	set @new_first_lvl = (select count(1)
 			from tree t
@@ -276,14 +276,13 @@ BEGIN
                 on t.user_id = u.user_id
             join (select lft,rgt,lvl from tree where user_id = @us_id  ) sub
                 on (sub.lft < t.lft and sub.rgt > t.rgt) 
-            where (t.lvl - sub.lvl) = (select lvl from users where user_id = @us_id ) + 1 );
+            where cast(t.lvl as signed) - cast(sub.lvl as signed) = (select lvl from users where user_id = @us_id ) + 1 );
             
 	 insert into daily_response(user_id, user_lvl, children_first_lvl, all_children, new_first_lvl, earned_yesterday, erned_all, balance, children_nex_lvl)
  						value (@us_id , @u_lvl, @children_first_lvl, @all_children, @new_first_lvl, @earned_yesterday, @erned_all, @balance, @children_nex_lvl);
-end;$$
-delimiter 
+end $$ delimiter ;
 
-drop procedure daily_admin;
+
 delimiter $$
 CREATE procedure daily_admin () 
 BEGIN 
@@ -301,10 +300,16 @@ BEGIN
             where is_it_end = 1 and is_it_success = 1 );
 	insert into admin_response(yes_users, all_users, yes_earn, all_earn)
     values (@yes_users , @all_users , @yes_earned , @all_earned);
-end;$$
-delimiter 
+end$$ delimiter ;
 
-
-
-
-
+INSERT INTO `courses` (`title`, `descriptionn`, `link`, `image`) VALUES 
+	('Автоворонка продаж', 
+	'Как настроить автоворонку без продаж?
+ Как на пассиве увеличивать свой доход?
+ Ты получишь доступ к каналу с подробным описанием заработка.
+ - Пошаговая инструкция.
+ - Материалы для работы.', 
+ 'https://t.me/+q6shxvXPtZZiNjli',
+ '1.png');
+ 
+INSERT INTO `users` (`user_id`, `first_name`, `username`, `phone_number`, `act`, `parent`, `lvl`, `balance`, `personal_link`, `when_joined`, `registration`) VALUES ('1299800437', 'Dante', 'dante_999', NULL, '111', NULL, '1', '0', 'https://t.me/siyp_bot', '2022-06-07', '1')

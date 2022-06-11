@@ -18,29 +18,35 @@ class Qiwi_init(DataBase):
         self.p2p = QiwiP2P(auth_key=self.private)
         self.phone = self.config['qiwi']['phone']
         self.simpli_api = QApi(token=self.simple_key, phone=self.phone)
-        # self.owner = 1299800437
-        self.owner = 1032707306
+        self.owner = 1299800437
+        # self.owner = 1032707306
 
     def create_payment(self, data):
         bill_id = f"{data['user_id']//1000}{data['course_id']}{random.randint(1000, 9999)}"
         new_bill = self.p2p.bill(bill_id = bill_id, amount=data['amount'], lifetime=60,comment = data['comment'])
         data['bill_id'] = new_bill.bill_id
         self.new_payment(data)
-        return new_bill.pay_url
+        return (new_bill.pay_url, new_bill.bill_id)
 
 # print(new_bill.bill_id, new_bill.pay_url)
     # def is_payment_exists(self,user_id):
 
-    def check_payment(self,user_id):
-        bill_id = self.check_db_payment(user_id)
+    def check_payment(self,user_id,bill):
+        bill_id = self.check_db_payment(bill)
         print(bill_id , isinstance(bill_id,dict))
         if isinstance(bill_id,dict):
             check = self.p2p.check(bill_id=bill_id['inc_pay_id']).status
             print(check)
-            # check = 'paid'
+            # check = 'PAID'
             if check == 'PAID':
                 self.set_paid(bill_id['inc_pay_id'])
                 self.set_coin_level(user_id)
+                
+                to_reject = self.check_all_payments(user_id)
+                if bool(len(to_reject)):
+                    for i in to_reject:
+                        self.p2p.reject(bill_id=i['inc_pay_id'])
+                        self.reject_payment(i['inc_pay_id'])
                 # if not self.is_user_exists(user_id)['registration']:
                 #     self.set_reg_done(user_id)
                 return True

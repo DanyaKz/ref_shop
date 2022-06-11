@@ -20,8 +20,8 @@ class Message_init(Admin_Init):
         logging.basicConfig(level=logging.INFO)
         self.bot = Bot(token=API_TOKEN)
         self.dp = Dispatcher(self.bot)
-        # self.owner = 1299800437 #owner's telegram id
-        self.owner = 1032707306
+        self.owner = 1299800437 #owner's telegram id
+        # self.owner = 1032707306
         with open('messages.json', encoding='utf-8') as mgs:
             self.list_of_msgs = json.load(mgs)
         with open('keyboard.json', encoding='utf-8') as kb:
@@ -76,7 +76,7 @@ class Message_init(Admin_Init):
                 if get_user['act'] == 111 :
                     if get_user['registration']:
                         # menu panel reply kb
-                        print(self.get_len(user_id))
+                        # print(self.get_len(user_id))
                         await self.callback_speaker(msg = 'Главное меню:', 
                                                 mark=self.KB['menu'],
                                                 to = user_id)
@@ -144,6 +144,18 @@ class Message_init(Admin_Init):
                                                     mark = mark,
                                                     to = user_id,
                                                     img = f"{image}")
+                elif get_user['user_id'] == self.owner and get_user['act'] == 13:
+                    print(2)
+                    img = await message.photo[-1].download()
+                    image = img.name.split('/')[1]
+                    self.add_pic_msgs(image)
+                    menu = InlineKeyboardButton('Сбросить и выйти', callback_data='admin0')
+                    mark = InlineKeyboardMarkup().add(menu)
+
+                    await self.bot.send_message(user_id , "Ну и на последок напиши данные для кнопки в формате \n\n<b><i><u>ТЕКСТ КНОПКИ</u> - <u>ССЫЛКА</u></i></b>",
+                    parse_mode = 'HTML',
+                    reply_markup= mark)
+                    self.set_action(14,user_id)
 
                 await self.bot.delete_message(chat_id = message.chat.id ,message_id = message.message_id-1)
                 
@@ -189,6 +201,34 @@ class Message_init(Admin_Init):
                 await self.callback_speaker(msg= 'Главное меню:', 
                                                     mark = self.KB['menu'],
                                                     to = user_id)
+   
+   
+    def was_it_paid_callback_handler(self):
+        @self.dp.callback_query_handler(lambda c: c.data and c.data.startswith('paid'))
+        async def main_handler(call: types.CallbackQuery):
+            print(call)
+            print(call.data)
+            code_length = len(call.data)
+            code = call.data[-(code_length-4):]
+            user_id = call['from']['id']
+            get_user = self.is_user_exists(user_id)
+            check = await self.before_check(user_id,int(code))
+            print(check)
+            if isinstance(check,bool):
+                print(1)
+                if check:
+                    if not get_user['registration']:
+                        await self.callback_speaker(msg = self.list_of_msgs['primitive_messages'][4]['wanna_earn'], 
+                                            mark=self.KB['primitive_messages'][4]['wanna_earn'],
+                                            to = user_id)
+                    await self.bot.delete_message(chat_id = call.message.chat.id , message_id = call.message.message_id)
+                else :
+                    await call.answer(text='Вы еще не оплатили. Если же вы оплатили, то попробуйте подтвердить оплату через несколько минут.',show_alert=True)
+            else:
+                await call.answer(text=check,show_alert=True)
+                await self.bot.delete_message(chat_id = call.message.chat.id , message_id = call.message.message_id)
+                
+
 
     def qiwi_callback_handler(self):
         @self.dp.callback_query_handler(lambda c: c.data and c.data.startswith('buy'))
@@ -211,27 +251,16 @@ class Message_init(Admin_Init):
                 print(code)
                 await self.payment_message(to_send)
                 print(code)
-            elif code == 2:
-                check = await self.before_check(user_id)
-                print(check)
-                if isinstance(check,bool):
-                    print(1)
-                    if check:
-                        await self.bot.delete_message(chat_id = call.message.chat.id , message_id = call.message.message_id)
-                        if not get_user['registration']:
-                            await self.callback_speaker(msg = self.list_of_msgs['primitive_messages'][4]['wanna_earn'], 
-                                                mark=self.KB['primitive_messages'][4]['wanna_earn'],
-                                                to = user_id)
-                    else :
-                        await call.answer(text='Вы еще не оплатили. Если же вы оплатили, то попробуйте подтвердить оплату через несколько минут.',show_alert=True)
-                else:
-                    await call.answer(text=check,show_alert=True)
-                    await self.bot.delete_message(chat_id = call.message.chat.id , message_id = call.message.message_id)
+            # elif code == 2:
+                
             elif code == 3:
                 self.set_action(1,user_id)
-                await self.callback_speaker(msg = self.list_of_msgs['primitive_messages'][11]['phone_number'], 
-                                            mark=self.KB['primitive_messages'][11]['phone_number'],
-                                            to = user_id)
+                if get_user['registration']:
+                    await self.callback_speaker(msg = self.list_of_msgs['primitive_messages'][11]['phone_number'], 
+                                                mark=self.KB['primitive_messages'][11]['phone_number'],
+                                                to = user_id)
+                else: 
+                    await self.bot.send_message(user_id,self.list_of_msgs['primitive_messages'][11]['phone_number'] , parse_mode='HTML')
             elif code == 4:
                 self.set_action(111,user_id)
                 await self.bot.delete_message(chat_id = call.message.chat.id , message_id = call.message.message_id)
@@ -294,7 +323,7 @@ class Message_init(Admin_Init):
                                             mark=mark,
                                             to = user_id)
             elif code == 5:
-                get = InlineKeyboardButton('Приобрести', url='https://t.me/SIYP_ideas')
+                get = InlineKeyboardButton('Приобрести', url='https://t.me/SIYP_ideas/7')
                 mark.add(get,menu)
                 await self.callback_speaker(msg = "Перейди в канал с Бизнес-идеями.\nВыбери необходимую.\nНажми «Приобрести»", 
                                             mark=mark,
@@ -316,7 +345,9 @@ class Message_init(Admin_Init):
                 await self.my_children(user_id)
             elif code == 9:
                 mark.add(menu)
-                await self.callback_speaker(msg = f"Твоя реферальная ссылка для приглашения пользователей: <b><i>{get_user['personal_link']}</i></b>", 
+                await self.bot.send_message(user_id,f"Твоя реферальная ссылка для приглашения пользователей:", parse_mode='HTML')
+                await self.bot.send_message(user_id,f"<b><i>{get_user['personal_link']}</i></b>", parse_mode='HTML')
+                await self.callback_speaker(msg = f"Ты всегда можешь ее найти в меню.\nВ разделе «Рефералка».", 
                                             mark=mark,
                                             to = user_id)
             elif code == 10:
@@ -335,7 +366,7 @@ class Message_init(Admin_Init):
                 try:
                     course = self.get_course(code)
                     course['user_id'] = user_id
-                    course['amount'] = 100
+                    course['amount'] = 10
                     course['owner'] = self.owner
                     await self.payment_message(course)
                 except Exception as e:
@@ -472,7 +503,8 @@ class Message_init(Admin_Init):
             mark = InlineKeyboardMarkup().add(menu)
             last_course = self.get_last_course()
             last_queue = self.select_from_queue()
-
+            last_msg = self.get_last_msg()
+            print('get_user',get_user)
             if get_user['act'] in range(3,6) and code!= 9:
                 try :
                     os.remove(f"photos/{last_course['image']}")
@@ -485,6 +517,12 @@ class Message_init(Admin_Init):
                     if not self.is_image_exists(last_queue['image']):
                         os.remove(f"photos/{last_queue['image']}")
                 print(last_queue)
+            if get_user['act'] in [13,14]:
+                self.delete_msgs_db()
+                if last_msg['img'] != None:
+                    if not self.is_image_exists(last_msg['img']):
+                        os.remove(f"photos/{last_msg['img']}")
+                print(last_queue)
             if code == 0:
                 self.set_action(111,user_id)
                 await self.callback_speaker(msg = 'Административное меню', mark=self.KB['admin'],
@@ -495,15 +533,10 @@ class Message_init(Admin_Init):
                                         to = user_id)
 
             elif code == 2:
-                if get_user['act'] == 11:
-                    last_msg = self.get_last_msg()
-                    self.confirm_msgs(last_msg['id_sent_messages'])
-                    print(last_msg)
-                    await self.send_to_users({'user_id':user_id, 'msg' : last_msg, 'mark':self.KB['admin']})
-                else:
-                    self.set_action(11,user_id)
-                    await self.callback_speaker(msg = 'Напишите ваше сообщение для активных пользователей:', mark=mark,
-                                            to = user_id)
+                self.set_action(11,user_id)
+                await self.callback_speaker(msg = 'Напишите ваше сообщение для активных пользователей:', mark=mark,
+                                        to = user_id)
+                    
             elif code == 3:
                 users = InlineKeyboardButton('Юзеры', callback_data='admin7')
                 money = InlineKeyboardButton('Деньги', callback_data='admin8')
@@ -542,6 +575,11 @@ class Message_init(Admin_Init):
                 await self.callback_speaker(msg = 'Административное меню', mark=self.KB['admin'],
                                         to = user_id)
             await self.bot.delete_message(chat_id = call.message.chat.id , message_id = call.message.message_id)
+            if code == 10:
+                last_msg = self.get_last_msg()
+                self.confirm_msgs(last_msg['id_sent_messages'])
+                print(last_msg)
+                await self.send_to_users({'user_id':user_id, 'msg' : last_msg, 'mark':self.KB['admin']})
 
 
     def pages(self):

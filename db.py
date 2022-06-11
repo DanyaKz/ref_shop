@@ -42,7 +42,7 @@ class DataBase():
             from tree t 
             join users u   
                 on t.user_id = u.user_id
-            join (select * from tree where user_id = {int(user_id)} ) sub
+            join (select  lft,rgt from tree where user_id = '{int(user_id)}' ) sub
                 on sub.lft > t.lft and sub.rgt < t.rgt
             order by t.id;
         """
@@ -72,9 +72,9 @@ class DataBase():
         self.cur.execute(my_execute)
         self.conn.commit()
 
-    def check_db_payment(self,data):
+    def check_db_payment(self,bill_id):
         my_execute = f"""
-            select * from incoming_payments where user_id = {data} and is_it_end = 0 and is_it_success = 0;
+            select * from incoming_payments where inc_pay_id = {bill_id} and is_it_end = 0 and is_it_success = 0;
         """
         self.cur.execute(my_execute)
         check = self.cur.fetchone()
@@ -87,6 +87,14 @@ class DataBase():
         else : 
             False
     
+    def check_all_payments(self,user_id):
+        my_execute = f"""
+            select * from incoming_payments where user_id = {user_id} and is_it_end = 0 and is_it_success = 0;
+        """
+        self.cur.execute(my_execute)
+        return self.cur.fetchall()
+
+
     def get_last_payment(self, user_id):
         my_execute = f"""
             select * from incoming_payments where user_id = {user_id} and is_it_end = 1 and is_it_success = 1 
@@ -140,7 +148,7 @@ class DataBase():
         # select tree();
         # """
         # self.cur.execute(my_execute)
-        self.cur.execute(f"""insert into users(user_id,first_name,username,parent) value({data['user_id']},"{self.change_quotes(data['first_name'])}","{data['username']}",{data['parent']});""")
+        self.cur.execute(f"""insert into users(user_id,first_name,username,parent) value({data['user_id']},"{self.change_quotes(data['first_name'])}",replace('{data['username']}', 'null' , null),{data['parent']});""")
         self.cur.execute(f"insert into tree(user_id,parent_id) value({data['user_id']},{data['parent_for_tree']});")
         self.cur.execute(f"call tree();")
         self.conn.commit()
@@ -176,7 +184,7 @@ class DataBase():
             return False 
     
     def get_users_courses(self,page,user_id):
-        limit = 1
+        limit = 5
         offset = (page - 1)*limit
         self.cur.execute(f'select * from shopping_cart where buyer = {user_id} limit {limit} offset {offset}; ')
         return self.cur.fetchall()
@@ -202,16 +210,16 @@ class DataBase():
             return False
     
     def children_lvl_count(self,user_id):
-        my_execute = f"""select t.lvl - sub.lvl 'floor', count('floor') 'c'
+        my_execute = f"""select t.lvl - sub.lvl 'floor' , count(t.lvl) 'c'
             from tree t
-            join users u   
+			join users u
                 on t.user_id = u.user_id
-            join (select * from tree where user_id = '{int(user_id)}' ) sub
+			join (select  lft,rgt,lvl from tree where user_id = '{int(user_id)}' ) sub
                 on (sub.lft < t.lft and sub.rgt > t.rgt) 
-            where (t.lvl - sub.lvl) <= (select lvl from users where user_id = '{int(user_id)}') 
+            where cast(t.lvl as signed) - cast(sub.lvl as signed) <= (select lvl from users where user_id ='{int(user_id)}') 
             and u.lvl > 0
-            group by 'floor'
-            order by 'floor';
+            group by t.lvl
+            order by t.lvl;
             """
         self.cur.execute(my_execute)
         return self.cur.fetchall()
@@ -221,9 +229,9 @@ class DataBase():
             from tree t
             join users u   
                 on t.user_id = u.user_id
-            join (select * from tree where user_id = '{int(user_id)}' ) sub
+            join (select  lft,rgt,lvl from tree where user_id = '{int(user_id)}' ) sub
                 on (sub.lft < t.lft and sub.rgt > t.rgt) 
-            where (t.lvl - sub.lvl) = (select lvl from users where user_id = '{int(user_id)}') + 1 ;
+            where cast(t.lvl as signed) - cast(sub.lvl as signed) = (select lvl from users where user_id = '{int(user_id)}') + 1 ;
             """
         self.cur.execute(my_execute)
         return self.cur.fetchone()
@@ -233,9 +241,9 @@ class DataBase():
             from tree t
             join users u   
                 on t.user_id = u.user_id
-            join (select * from tree where user_id = '{int(user_id)}' ) sub
+            join (select  lft,rgt,lvl from tree where user_id = '{int(user_id)}' ) sub
                 on (sub.lft < t.lft and sub.rgt > t.rgt) 
-            where (t.lvl - sub.lvl) = 1 and u.lvl > 0;"""
+            where cast(t.lvl as signed) - cast(sub.lvl as signed) = 1 and u.lvl > 0;"""
         self.cur.execute(my_execute)
         return self.cur.fetchone()
 
@@ -244,7 +252,7 @@ class DataBase():
         return self.cur.fetchone()
 
     def get_active_users(self):
-        self.cur.execute(f'select * from users where lvl > 1;')
+        self.cur.execute(f'select * from users where lvl > 0;')
         return self.cur.fetchall()
 
     def get_last_msg(self):
@@ -253,11 +261,20 @@ class DataBase():
     def add_msgs(self,data):
         self.cur.execute(f"INSERT INTO `sent_messages` (`msg_text`) VALUES ('{self.change_quotes(data)}'); ")
         self.conn.commit()
+    def add_pic_msgs(self,data):
+        self.cur.execute(f"UPDATE `sent_messages` SET `img` = '{data}' WHERE (`id_sent_messages` = '{self.get_last_msg()['id_sent_messages']}');")
+        self.conn.commit()
+    def add_btn_msgs(self,data):
+        self.cur.execute(f"UPDATE `sent_messages` SET `btn_title` = '{data['title']}', `btn_link` = '{data['link']}' WHERE (`id_sent_messages` = '{self.get_last_msg()['id_sent_messages']}');")
+        self.conn.commit()
     def confirm_msgs(self,data):
         self.cur.execute(f"update sent_messages set confirm = 1 where id_sent_messages = {data}; ")
         self.conn.commit()
     def msg_sent(self,data):
         self.cur.execute(f"update sent_messages set was_it_sent = 1 where id_sent_messages = {data}; ")
+        self.conn.commit()
+    def delete_msgs_db(self):
+        self.cur.execute(f"DELETE FROM `sys`.`sent_messages` WHERE (`id_sent_messages` = '{self.get_last_msg()['id_sent_messages']}');")
         self.conn.commit()
 # 36
 
@@ -380,13 +397,13 @@ class DataBase():
     
     def get_data_children_1_lvl(self, user_id):
         my_execute = f"""
-            select u.user_id, u.first_name
+            select u.user_id, u.first_name, u.username
             from tree t
             join users u   
                 on t.user_id = u.user_id
-            join (select * from tree where user_id = '{int(user_id)}' ) sub
+            join (select lft,rgt,lvl from tree where user_id = '{int(user_id)}' ) sub
                 on (sub.lft < t.lft and sub.rgt > t.rgt) 
-            where (t.lvl - sub.lvl) = 1 and u.lvl > 0;"""
+            where cast(t.lvl as signed) - cast(sub.lvl as signed) = 1 and u.lvl > 0;"""
         self.cur.execute(my_execute)
         return self.cur.fetchall()
     
@@ -401,5 +418,8 @@ class DataBase():
         self.cur.execute("select * from users where balance > 0;")
         return self.cur.fetchall()
 
-# db = DataBase()
-# print(db.my_salary_db(1032707306))
+    def asd(self):
+        self.cur.execute(f"INSERT INTO `courses` (`title`) VALUES (null);")
+        self.conn.commit()
+db = DataBase()
+print(db.asd())
