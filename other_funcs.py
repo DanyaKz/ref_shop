@@ -26,7 +26,7 @@ class Other_Funcs(Qiwi_init):
                         parse_mode = 'HTML')
         else :
             await self.bot.send_message(kwargs['to'], 
-                        text = kwargs['msg'] ,reply_markup = kwargs['mark'],parse_mode = 'HTML')
+                        text = kwargs['msg'] ,reply_markup = kwargs['mark'],parse_mode = 'HTML', disable_web_page_preview=True)
             # print('aa',msg)
 
     

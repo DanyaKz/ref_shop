@@ -201,8 +201,8 @@ class Message_init(Admin_Init):
                 await self.callback_speaker(msg= 'Главное меню:', 
                                                     mark = self.KB['menu'],
                                                     to = user_id)
-   
-   
+    
+    
     def was_it_paid_callback_handler(self):
         @self.dp.callback_query_handler(lambda c: c.data and c.data.startswith('paid'))
         async def main_handler(call: types.CallbackQuery):
@@ -243,9 +243,9 @@ class Message_init(Admin_Init):
             if code.isdigit():
                     code = int(code)
             if code == 1:
-                to_send = {'amount':2,
+                to_send = {'amount':10,
                             'user_id':user_id,
-                            'course_id':2,
+                            'course_id':1,
                             'owner':self.owner
                             }
                 print(code)
@@ -346,7 +346,7 @@ class Message_init(Admin_Init):
             elif code == 9:
                 mark.add(menu)
                 await self.bot.send_message(user_id,f"Твоя реферальная ссылка для приглашения пользователей:", parse_mode='HTML')
-                await self.bot.send_message(user_id,f"<b><i>{get_user['personal_link']}</i></b>", parse_mode='HTML')
+                await self.bot.send_message(user_id,f"<b><i>{get_user['personal_link']}</i></b>", parse_mode='HTML', disable_web_page_preview=True)
                 await self.callback_speaker(msg = f"Ты всегда можешь ее найти в меню.\nВ разделе «Рефералка».", 
                                             mark=mark,
                                             to = user_id)
@@ -366,7 +366,7 @@ class Message_init(Admin_Init):
                 try:
                     course = self.get_course(code)
                     course['user_id'] = user_id
-                    course['amount'] = 10
+                    course['amount'] = 100
                     course['owner'] = self.owner
                     await self.payment_message(course)
                 except Exception as e:
@@ -461,7 +461,7 @@ class Message_init(Admin_Init):
                         await self.bot.edit_message_caption(
                                 chat_id=self.chanel_id,
                                 message_id=get_course['msg_id'],
-                                caption=f"{get_course['course_id']}.{get_course['title']}\n\n{get_course['descriptionn']}",
+                                caption=f"{get_course['course_id']}. {get_course['title']}\n\n{get_course['descriptionn']}",
                                 reply_markup=mark
                             )
                     elif get_user['act'] == 9:

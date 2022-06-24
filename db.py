@@ -288,22 +288,30 @@ class DataBase():
 
     def db_response_money(self):
         my_execute = """select ifnull(sum(value_of_payment),0) 'sum' from incoming_payments
+            where is_it_end and is_it_success = 1
             union all
             select ifnull(sum(value_of_payment),0) from incoming_payments 
-                where date_format(time_of_payment, '%y-%m-%d') = date_format(date_sub(now(), interval 1 day), '%y-%m-%d')
+                where date_format(time_of_payment, '%y-%m-%d') = date_format(date_sub(now(), interval 1 day), '%y-%m-%d') 
+                and (is_it_end and is_it_success = 1)
             union all
             select ifnull(sum(balance),0) from users;
             """
         self.cur.execute(my_execute)
         return self.cur.fetchall()
     
+    def del_courses_where_msg_null(self):
+        self.cur.execute(f"""delete from courses where msg_id is null""")
+        self.conn.commit()
+        self.cur.execute(f"""select * from courses order by course_id desc limit 1 """)
+        return self.cur.fetchone()
 
     def upd_title_db(self,data):
         print(f"""update courses set title = "{self.change_quotes(data['title'])}" where course_id = {data['course_id']}; """)
         self.cur.execute(f"""update courses set title = "{self.change_quotes(data['title'])}" where course_id = {data['course_id']}; """)
         self.conn.commit()
     def title_db(self,data):
-        self.cur.execute(f'INSERT INTO `courses` (`title`) VALUES ("{self.change_quotes(data)}"); ')
+        last_id = self.del_courses_where_msg_null()
+        self.cur.execute(f'INSERT INTO `courses` (`course_id`,`title`) VALUES ({sum([last_id["course_id"],1])},"{self.change_quotes(data)}"); ')
         self.conn.commit()
     def desc_db(self,data):
         self.cur.execute(f"""update courses set descriptionn = "{data['descriptionn']}" where course_id = {data['course_id']}; """)
@@ -422,4 +430,4 @@ class DataBase():
         self.cur.execute(f"INSERT INTO `courses` (`title`) VALUES (null);")
         self.conn.commit()
 db = DataBase()
-print(db.asd())
+# print(db.get_user_s_id(1032707306))

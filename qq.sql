@@ -100,9 +100,11 @@ end $$ delimiter;
 
 DELIMITER $$
 CREATE TRIGGER `when_1_lvl` BEFORE UPDATE ON `users` FOR EACH ROW begin
-	if new.lvl = 1
-		then
-			set new.when_joined = now();
+	if not (new.lvl <=> old.lvl) THEN
+        if new.lvl = 1
+            then
+                set new.when_joined = now();
+        end if;
 	end if;
 end $$ DELIMITER ;
 
@@ -178,7 +180,7 @@ CREATE TABLE `shopping_cart` (
   `course_id` int NOT NULL,
   PRIMARY KEY (`shop_id`),
   FOREIGN KEY (`buyer`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
-  FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`) 
+  FOREIGN KEY (`course_id`) REFERENCES `courses` (`course_id`)  ON DELETE CASCADE
 );
 
 
@@ -302,7 +304,7 @@ BEGIN
     values (@yes_users , @all_users , @yes_earned , @all_earned);
 end$$ delimiter ;
 
-INSERT INTO `courses` (`title`, `descriptionn`, `link`, `image`) VALUES 
+INSERT INTO `courses` (`title`, `descriptionn`, `link`, `image`, `msg_id`) VALUES 
 	('Автоворонка продаж', 
 	'Как настроить автоворонку без продаж?
  Как на пассиве увеличивать свой доход?
@@ -310,6 +312,7 @@ INSERT INTO `courses` (`title`, `descriptionn`, `link`, `image`) VALUES
  - Пошаговая инструкция.
  - Материалы для работы.', 
  'https://t.me/+q6shxvXPtZZiNjli',
- '1.png');
+ '1.png',14);
+ 
  
 INSERT INTO `users` (`user_id`, `first_name`, `username`, `phone_number`, `act`, `parent`, `lvl`, `balance`, `personal_link`, `when_joined`, `registration`) VALUES ('1299800437', 'Dante', 'dante_999', NULL, '111', NULL, '1', '0', 'https://t.me/siyp_bot', '2022-06-07', '1')

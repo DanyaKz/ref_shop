@@ -26,7 +26,7 @@ class Admin_Init(Other_Funcs):
         get = InlineKeyboardButton('Приобрести за 100 руб.', callback_data=f"course{get_last['course_id']}")
         mark = InlineKeyboardMarkup().add(get)
         img = get_last['image']
-        msg = f"{get_last['course_id']}. {get_last['title']}\n\n{get_last['descriptionn']}"
+        msg = f"{get_last['course_id']}.  {get_last['title']}\n\n{get_last['descriptionn']}"
         msg_id = await self.bot.send_photo(self.chanel_id, 
                         open(f"photos/{img}" , 'rb'),
                         caption=msg,

@@ -11,13 +11,16 @@ class Runner(Message_init):
         super().__init__(self.token)
         
 
+    async def just_test(self):
+        test = self.select_from_queue()
+        print(test)
 
     async def scheduler(self):
-        aioschedule.every().day.at("07:00").do(self.daily_admin_response)
-        aioschedule.every().day.at("07:30").do(self.daily_users_response)
-        # aioschedule.every(10).seconds.do(self.dailоy_admin_response)
-        aioschedule.every().day.at("08:00").do(self.daily_zero_users_response)
-        aioschedule.every().day.at("08:30").do(self.daily_payment)
+        aioschedule.every().day.at("07:30").do(self.daily_admin_response)
+        aioschedule.every().day.at("08:00").do(self.daily_users_response)
+        aioschedule.every(120).seconds.do(self.just_test)
+        aioschedule.every().day.at("08:30").do(self.daily_zero_users_response)
+        aioschedule.every().day.at("09:30").do(self.daily_payment)
         while True:
             await aioschedule.run_pending()
             await asyncio.sleep(1)
@@ -45,8 +48,8 @@ class Runner(Message_init):
     
 
 bot = Runner()
-try: 
-    bot.run_funcs()
-except Exception as e:
+# try: 
+    # bot.run_funcs()
+# except Exception as e:
     # asyncio.create_task(bot.send_to_developer(e))
-    bot.run_funcs()
+bot.run_funcs()
